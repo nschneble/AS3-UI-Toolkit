@@ -1,0 +1,5 @@
+# OS X
+.DS_Store
+
+# Flash Builder
+bin/
