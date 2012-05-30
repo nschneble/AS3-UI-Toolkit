@@ -22,11 +22,23 @@ package com.njs.toolkit.ui
 			addEventListener (Event.ADDED_TO_STAGE, onAddedToStage);
 		}
 
+		/**
+		 * Override to add child components.
+		 * 
+		 * This function will be called automatically when this component
+		 * is added to the stage.
+		 */
 		protected function createChildren () : void
 		{
 			// override in subclasses
 		}
 
+		/**
+		 * Override to remove child components and event listeners.
+		 * 
+		 * This function will be called automatically when this component
+		 * is removed from the stage.
+		 */
 		protected function destroy () : void
 		{
 			// override in subclasses
@@ -53,6 +65,12 @@ package com.njs.toolkit.ui
 			clickable = false;
 		}
 
+		/**
+		 * Override to handle click events.
+		 * 
+		 * This function will be called automatically when this component
+		 * receives a click event and clickable is true.
+		 */
 		protected function onClick (event : MouseEvent) : void
 		{
 			// override in subclasses
@@ -61,6 +79,9 @@ package com.njs.toolkit.ui
 
 		// public methods
 
+		/**
+		 * Set to true to allow this component to receive click events.
+		 */
 		public function set clickable (value : Boolean) : void
 		{
 			if (clickable != value)
