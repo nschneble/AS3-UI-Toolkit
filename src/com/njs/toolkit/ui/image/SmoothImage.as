@@ -32,7 +32,11 @@ package com.njs.toolkit.ui.image
 		private var _maintainAspectRatio : Boolean;
 		private var _centered : Boolean;
 		private var loader : Loader;
-		private var bitmap : Bitmap;
+
+		/**
+		 * The underlying bitmap image.
+		 */
+		protected var bitmap : Bitmap;
 
 
 		public function SmoothImage (x : Number = 0, y : Number = 0, width : Number = 0, height : Number = 0)
@@ -95,6 +99,9 @@ package com.njs.toolkit.ui.image
 			}
 		}
 
+		/**
+		 * The image width.
+		 */
 		public function set imageWidth (value : Number) : void
 		{
 			if (! isNaN (value) && value > 0)
@@ -110,6 +117,9 @@ package com.njs.toolkit.ui.image
 			return _imageWidth;
 		}
 
+		/**
+		 * The image height.
+		 */
 		public function set imageHeight (value : Number) : void
 		{
 			if (! isNaN (value) && value > 0)
@@ -125,6 +135,10 @@ package com.njs.toolkit.ui.image
 			return _imageHeight;
 		}
 
+		/**
+		 * Set to true to maintain the original aspect ratio when the
+		 * image is resized.
+		 */
 		public function set maintainAspectRatio (value : Boolean) : void
 		{
 			_maintainAspectRatio = value;
@@ -140,6 +154,9 @@ package com.njs.toolkit.ui.image
 		/**
 		 * Determines if the image should be centered when the
 		 * maintainAspectRatio property is set to true.
+		 * 
+		 * If false, the image will remain left-aligned for portraits and
+		 * top-aligned for landscapes.
 		 */
 		public function set centered (value : Boolean) : void
 		{
@@ -215,7 +232,12 @@ package com.njs.toolkit.ui.image
 
 		// helper methods
 
-		private function resizeImage () : void
+		/**
+		 * Resizes the image.
+		 * 
+		 * Images are scaled to fit unless maintainAspectRatio is true.
+		 */
+		protected function resizeImage () : void
 		{
 			if (bitmap)
 			{
