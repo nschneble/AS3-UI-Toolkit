@@ -21,7 +21,6 @@ package com.njs.toolkit.ui.buttons
 		public static const BOTTOM_MARGIN : Number = 4;
 		public static const LEFT_MARGIN : Number = 7;
 		public static const RIGHT_MARGIN : Number = 5;
-		public static const BACKGROUND_ALPHAS : Array = [1.0, 1.0];
 		public static const BACKGROUND_RATIOS : Array = [0, 255];
 		public static const DEFAULT_CORNER_RADIUS : Number = 8;
 		public static const DEFAULT_SELECTED_BACKGROUND_COLORS : Array = [0xCCCCCC, 0x999999];
@@ -33,6 +32,9 @@ package com.njs.toolkit.ui.buttons
 		public static const DROP_SHADOW_COLOR : uint = 0x999999;
 		public static const FULL_DROP_SHADOW : Number = 1.0;
 		public static const HALF_DROP_SHADOW : Number = 0.5;
+		public static const DEFAULT_SELECTED_BACKGROUND_ALPHAS : Array = [1.0, 1.0];
+		public static const DEFAULT_HIGHLIGHTED_BACKGROUND_ALPHAS : Array = [1.0, 1.0];
+		public static const DEFAULT_BACKGROUND_ALPHAS : Array = [1.0, 1.0];
 
 
 		// instance variables
@@ -47,6 +49,9 @@ package com.njs.toolkit.ui.buttons
 		private var _text : String;
 		private var _showDropShadow : Boolean;
 		private var _cornerRadius : Number;
+		private var _selectedBackgroundAlphas : Array;
+		private var _highlightedBackgroundAlphas : Array;
+		private var _backgroundAlphas : Array;
 		private var mouseOver : Boolean;
 		private var mouseDown : Boolean;
 
@@ -82,6 +87,9 @@ package com.njs.toolkit.ui.buttons
 			_text = "";
 			_showDropShadow = true;
 			_cornerRadius = DEFAULT_CORNER_RADIUS;
+			_selectedBackgroundAlphas = DEFAULT_SELECTED_BACKGROUND_ALPHAS;
+			_highlightedBackgroundAlphas = DEFAULT_HIGHLIGHTED_BACKGROUND_ALPHAS;
+			_backgroundAlphas = DEFAULT_BACKGROUND_ALPHAS;
 
 			mouseOver = false;
 			mouseDown = false;
@@ -116,6 +124,9 @@ package com.njs.toolkit.ui.buttons
 			_selectedBackgroundColors = null;
 			_highlightedBackgroundColors = null;
 			_backgroundColors = null;
+			_selectedBackgroundAlphas = null;
+			_highlightedBackgroundAlphas = null;
+			_backgroundAlphas = null;
 
 			background = null;
 			buttonTextField = null;
@@ -319,6 +330,68 @@ package com.njs.toolkit.ui.buttons
 			return _cornerRadius;
 		}
 
+		/**
+		 * The alpha values for the background colors when this button is
+		 * selected.
+		 * 
+		 * Must be an Array object of two numbers.
+		 */
+		public function set selectedBackgroundAlphas (values : Array) : void
+		{
+			if (values && values.length == 2 && ! isNaN (values [0]) && ! isNaN (values [1]))
+			{
+				_selectedBackgroundAlphas = values;
+
+				updateDisplayList ();
+			}
+		}
+
+		public function get selectedBackgroundAlphas () : Array
+		{
+			return _selectedBackgroundAlphas;
+		}
+
+		/**
+		 * The alpha values for the background colors when the mouse is
+		 * over this button.
+		 * 
+		 * Must be an Array object of two numbers.
+		 */
+		public function set highlightedBackgroundAlphas (values : Array) : void
+		{
+			if (values && values.length == 2 && ! isNaN (values [0]) && ! isNaN (values [1]))
+			{
+				_highlightedBackgroundAlphas = values;
+
+				updateDisplayList ();
+			}
+		}
+
+		public function get highlightedBackgroundAlphas () : Array
+		{
+			return _highlightedBackgroundAlphas;
+		}
+
+		/**
+		 * The alpha values for the background colors.
+		 * 
+		 * Must be an Array object of two numbers.
+		 */
+		public function set backgroundAlphas (values : Array) : void
+		{
+			if (values && values.length == 2 && ! isNaN (values [0]) && ! isNaN (values [1]))
+			{
+				_backgroundAlphas = values;
+
+				updateDisplayList ();
+			}
+		}
+
+		public function get backgroundAlphas () : Array
+		{
+			return _backgroundAlphas;
+		}
+
 
 		// event handlers
 
@@ -420,10 +493,10 @@ package com.njs.toolkit.ui.buttons
 				matrix.createGradientBox (width, height, Math.PI * 0.5);
 
 				var backgroundColors : Array = mouseDown ? selectedBackgroundColors : (mouseOver ? highlightedBackgroundColors : backgroundColors);
-				var dropShadowAlpha : Number = mouseOver ? FULL_DROP_SHADOW : HALF_DROP_SHADOW;
+				var backgroundAlphas : Array = mouseDown ? selectedBackgroundAlphas : (mouseOver ? highlightedBackgroundAlphas : backgroundAlphas);
 
 				background.graphics.clear ();
-				background.graphics.beginGradientFill (GradientType.LINEAR, backgroundColors, BACKGROUND_ALPHAS, BACKGROUND_RATIOS, matrix);
+				background.graphics.beginGradientFill (GradientType.LINEAR, backgroundColors, backgroundAlphas, BACKGROUND_RATIOS, matrix);
 
 				if (cornerRadius > 0)
 				{
@@ -438,6 +511,8 @@ package com.njs.toolkit.ui.buttons
 
 				if (showDropShadow)
 				{
+					var dropShadowAlpha : Number = mouseOver ? FULL_DROP_SHADOW : HALF_DROP_SHADOW;
+
 					filters = [new GlowFilter (DROP_SHADOW_COLOR, dropShadowAlpha)];
 				}
 				else
