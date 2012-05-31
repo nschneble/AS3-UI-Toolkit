@@ -29,6 +29,8 @@ package com.njs.toolkit.ui.buttons
 		public static const DEFAULT_TEXT_COLOR : uint = 0x666666;
 		public static const DEFAULT_SELECTED_TEXT_COLOR : uint = 0xFFFFFF;
 		public static const DROP_SHADOW_COLOR : uint = 0x999999;
+		public static const FULL_DROP_SHADOW : Number = 1.0;
+		public static const HALF_DROP_SHADOW : Number = 0.5;
 
 
 		// instance variables
@@ -39,6 +41,7 @@ package com.njs.toolkit.ui.buttons
 		private var _textColor : uint;
 		private var _selectedTextColor : uint;
 		private var _text : String;
+		private var _showDropShadow : Boolean;
 		private var mouseOver : Boolean;
 		private var mouseDown : Boolean;
 
@@ -70,6 +73,7 @@ package com.njs.toolkit.ui.buttons
 			_textColor = DEFAULT_TEXT_COLOR;
 			_selectedTextColor = DEFAULT_SELECTED_TEXT_COLOR;
 			_text = "";
+			_showDropShadow = true;
 
 			mouseOver = false;
 			mouseDown = false;
@@ -237,6 +241,21 @@ package com.njs.toolkit.ui.buttons
 			return _text;
 		}
 
+		/**
+		 * Set to true to display a drop shadow behind the button.
+		 */
+		public function set showDropShadow (value : Boolean) : void
+		{
+			_showDropShadow = value;
+
+			updateDisplayList ();
+		}
+
+		public function get showDropShadow () : Boolean
+		{
+			return _showDropShadow;
+		}
+
 
 		// event handlers
 
@@ -336,14 +355,21 @@ package com.njs.toolkit.ui.buttons
 				matrix.createGradientBox (width, height, Math.PI * 0.5);
 
 				var backgroundColors : Array = mouseDown ? selectedBackgroundColors : backgroundColors;
-				var dropShadowAlpha : Number = mouseOver ? 1.0 : 0.5;
+				var dropShadowAlpha : Number = mouseOver ? FULL_DROP_SHADOW : HALF_DROP_SHADOW;
 
 				background.graphics.clear ();
 				background.graphics.beginGradientFill (GradientType.LINEAR, backgroundColors, BACKGROUND_ALPHAS, BACKGROUND_RATIOS, matrix);
 				background.graphics.drawRoundRect (0, 0, width, height, ELLIPSE_SIZE, ELLIPSE_SIZE);
 				background.graphics.endFill ();
 
-				filters = [new GlowFilter (DROP_SHADOW_COLOR, dropShadowAlpha)];
+				if (showDropShadow)
+				{
+					filters = [new GlowFilter (DROP_SHADOW_COLOR, dropShadowAlpha)];
+				}
+				else
+				{
+					filters = [];
+				}
 			}
 		}
 
