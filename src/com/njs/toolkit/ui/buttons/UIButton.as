@@ -25,8 +25,10 @@ package com.njs.toolkit.ui.buttons
 		public static const BACKGROUND_RATIOS : Array = [0, 255];
 		public static const DEFAULT_CORNER_RADIUS : Number = 8;
 		public static const DEFAULT_SELECTED_BACKGROUND_COLORS : Array = [0xCCCCCC, 0x999999];
+		public static const DEFAULT_HIGHLIGHTED_BACKGROUND_COLORS : Array = [0xFFFFFF, 0xCCCCCC];
 		public static const DEFAULT_BACKGROUND_COLORS : Array = [0xFFFFFF, 0xCCCCCC];
 		public static const DEFAULT_TEXT_COLOR : uint = 0x666666;
+		public static const DEFAULT_HIGHLIGHTED_TEXT_COLOR : uint = 0x666666;
 		public static const DEFAULT_SELECTED_TEXT_COLOR : uint = 0xFFFFFF;
 		public static const DROP_SHADOW_COLOR : uint = 0x999999;
 		public static const FULL_DROP_SHADOW : Number = 1.0;
@@ -37,8 +39,10 @@ package com.njs.toolkit.ui.buttons
 		private var _width : Number;
 		private var _height : Number;
 		private var _selectedBackgroundColors : Array;
+		private var _highlightedBackgroundColors : Array;
 		private var _backgroundColors : Array;
 		private var _textColor : uint;
+		private var _highlightedTextColor : uint;
 		private var _selectedTextColor : uint;
 		private var _text : String;
 		private var _showDropShadow : Boolean;
@@ -70,8 +74,10 @@ package com.njs.toolkit.ui.buttons
 		private function init () : void
 		{
 			_selectedBackgroundColors = DEFAULT_SELECTED_BACKGROUND_COLORS;
+			_highlightedBackgroundColors = DEFAULT_HIGHLIGHTED_BACKGROUND_COLORS;
 			_backgroundColors = DEFAULT_BACKGROUND_COLORS;
 			_textColor = DEFAULT_TEXT_COLOR;
+			_highlightedTextColor = DEFAULT_HIGHLIGHTED_TEXT_COLOR;
 			_selectedTextColor = DEFAULT_SELECTED_TEXT_COLOR;
 			_text = "";
 			_showDropShadow = true;
@@ -108,6 +114,7 @@ package com.njs.toolkit.ui.buttons
 			removeEventListener (MouseEvent.MOUSE_UP, onToggleMouseDown);
 
 			_selectedBackgroundColors = null;
+			_highlightedBackgroundColors = null;
 			_backgroundColors = null;
 
 			background = null;
@@ -175,6 +182,27 @@ package com.njs.toolkit.ui.buttons
 		}
 
 		/**
+		 * The background colors to display (as a gradient) when the mouse
+		 * is over this button.
+		 * 
+		 * Must be an Array object of two uint values.
+		 */
+		public function set highlightedBackgroundColors (values : Array) : void
+		{
+			if (values && values.length == 2 && values [0] is uint && values [1] is uint)
+			{
+				_highlightedBackgroundColors = values;
+
+				updateDisplayList ();
+			}
+		}
+
+		public function get highlightedBackgroundColors () : Array
+		{
+			return _highlightedBackgroundColors;
+		}
+
+		/**
 		 * The background colors to display (as a gradient) for this
 		 * button.
 		 * 
@@ -208,6 +236,21 @@ package com.njs.toolkit.ui.buttons
 		public function get textColor () : uint
 		{
 			return _textColor;
+		}
+
+		/**
+		 * The color of the button text when the mouse is over this button.
+		 */
+		public function set highlightedTextColor (value : uint) : void
+		{
+			_highlightedTextColor = value;
+
+			updateDisplayList ();
+		}
+
+		public function get highlightedTextColor () : uint
+		{
+			return _highlightedTextColor;
 		}
 
 		/**
@@ -343,8 +386,10 @@ package com.njs.toolkit.ui.buttons
 		{
 			if (buttonTextField)
 			{
+				var textColor : uint = mouseDown ? selectedTextColor : (mouseOver ? highlightedTextColor : textColor);
+
 				buttonTextField.text = text;
-				buttonTextField.textColor = mouseDown ? selectedTextColor : textColor;
+				buttonTextField.textColor = textColor;
 				buttonTextField.textAlign = TextFormatAlign.CENTER;
 				buttonTextField.useBoldText = true;
 				buttonTextField.shrinkToFit = true;
@@ -374,7 +419,7 @@ package com.njs.toolkit.ui.buttons
 				var matrix : Matrix = new Matrix ();
 				matrix.createGradientBox (width, height, Math.PI * 0.5);
 
-				var backgroundColors : Array = mouseDown ? selectedBackgroundColors : backgroundColors;
+				var backgroundColors : Array = mouseDown ? selectedBackgroundColors : (mouseOver ? highlightedBackgroundColors : backgroundColors);
 				var dropShadowAlpha : Number = mouseOver ? FULL_DROP_SHADOW : HALF_DROP_SHADOW;
 
 				background.graphics.clear ();
