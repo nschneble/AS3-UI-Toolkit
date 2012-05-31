@@ -426,7 +426,7 @@ package com.njs.toolkit.ui.buttons
 
 		// event handlers
 
-		private function onToggleMouseOver (event : MouseEvent) : void
+		protected function onToggleMouseOver (event : MouseEvent) : void
 		{
 			switch (event.type)
 			{
@@ -446,7 +446,7 @@ package com.njs.toolkit.ui.buttons
 			updateDisplayList ();
 		}
 
-		private function onToggleMouseDown (event : MouseEvent) : void
+		protected function onToggleMouseDown (event : MouseEvent) : void
 		{
 			switch (event.type)
 			{
