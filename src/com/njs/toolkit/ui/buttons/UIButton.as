@@ -6,6 +6,7 @@ package com.njs.toolkit.ui.buttons
 	import flash.display.GradientType;
 	import flash.display.Shape;
 	import flash.events.MouseEvent;
+	import flash.filters.GlowFilter;
 	import flash.geom.Matrix;
 	import flash.text.TextFormatAlign;
 
@@ -19,21 +20,22 @@ package com.njs.toolkit.ui.buttons
 		public static const TOP_MARGIN : Number = 6;
 		public static const BOTTOM_MARGIN : Number = 4;
 		public static const LEFT_MARGIN : Number = 7;
-		public static const RIGHT_MARGIN : Number = 4;
+		public static const RIGHT_MARGIN : Number = 5;
 		public static const BACKGROUND_ALPHAS : Array = [1.0, 1.0];
 		public static const BACKGROUND_RATIOS : Array = [0, 255];
 		public static const ELLIPSE_SIZE : Number = 8;
-		public static const DEFAULT_SELECTED_BACKGROUND_COLOR : uint = 0x515151;
-		public static const DEFAULT_HOVER_BACKGROUND_COLORS : Array = [0xC2C2C2, 0xA1A1A1];
-		public static const DEFAULT_TEXT_COLOR : uint = 0x515151;
+		public static const DEFAULT_SELECTED_BACKGROUND_COLORS : Array = [0xCCCCCC, 0x999999];
+		public static const DEFAULT_BACKGROUND_COLORS : Array = [0xFFFFFF, 0xCCCCCC];
+		public static const DEFAULT_TEXT_COLOR : uint = 0x666666;
 		public static const DEFAULT_SELECTED_TEXT_COLOR : uint = 0xFFFFFF;
+		public static const DROP_SHADOW_COLOR : uint = 0x999999;
 
 
 		// instance variables
 		private var _width : Number;
 		private var _height : Number;
-		private var _selectedBackgroundColor : uint;
-		private var _hoverBackgroundColors : Array;
+		private var _selectedBackgroundColors : Array;
+		private var _backgroundColors : Array;
 		private var _textColor : uint;
 		private var _selectedTextColor : uint;
 		private var _text : String;
@@ -63,8 +65,8 @@ package com.njs.toolkit.ui.buttons
 
 		private function init () : void
 		{
-			_selectedBackgroundColor = DEFAULT_SELECTED_BACKGROUND_COLOR;
-			_hoverBackgroundColors = DEFAULT_HOVER_BACKGROUND_COLORS;
+			_selectedBackgroundColors = DEFAULT_SELECTED_BACKGROUND_COLORS;
+			_backgroundColors = DEFAULT_BACKGROUND_COLORS;
 			_textColor = DEFAULT_TEXT_COLOR;
 			_selectedTextColor = DEFAULT_SELECTED_TEXT_COLOR;
 			_text = "";
@@ -99,7 +101,8 @@ package com.njs.toolkit.ui.buttons
 			removeEventListener (MouseEvent.MOUSE_DOWN, onToggleMouseDown);
 			removeEventListener (MouseEvent.MOUSE_UP, onToggleMouseDown);
 
-			_hoverBackgroundColors = null;
+			_selectedBackgroundColors = null;
+			_backgroundColors = null;
 
 			background = null;
 			buttonTextField = null;
@@ -145,39 +148,45 @@ package com.njs.toolkit.ui.buttons
 		// public methods
 
 		/**
-		 * The background color to display when this button is selected.
-		 */
-		public function set selectedBackgroundColor (value : uint) : void
-		{
-			_selectedBackgroundColor = value;
-
-			updateDisplayList ();
-		}
-
-		public function get selectedBackgroundColor () : uint
-		{
-			return _selectedBackgroundColor;
-		}
-
-		/**
-		 * The background colors to display (as a gradient) when the mouse
-		 * is over this button.
+		 * The background colors to display (as a gradient) when this
+		 * button is selected.
 		 * 
 		 * Must be an Array object of two uint values.
 		 */
-		public function set hoverBackgroundColors (values : Array) : void
+		public function set selectedBackgroundColors (values : Array) : void
 		{
 			if (values && values.length == 2 && values [0] is uint && values [1] is uint)
 			{
-				_hoverBackgroundColors = values;
+				_selectedBackgroundColors = values;
 
 				updateDisplayList ();
 			}
 		}
 
-		public function get hoverBackgroundColors () : Array
+		public function get selectedBackgroundColors () : Array
 		{
-			return _hoverBackgroundColors;
+			return _selectedBackgroundColors;
+		}
+
+		/**
+		 * The background colors to display (as a gradient) for this
+		 * button.
+		 * 
+		 * Must be an Array object of two uint values.
+		 */
+		public function set backgroundColors (values : Array) : void
+		{
+			if (values && values.length == 2 && values [0] is uint && values [1] is uint)
+			{
+				_backgroundColors = values;
+
+				updateDisplayList ();
+			}
+		}
+
+		public function get backgroundColors () : Array
+		{
+			return _backgroundColors;
 		}
 
 		/**
@@ -241,6 +250,7 @@ package com.njs.toolkit.ui.buttons
 
 				case (MouseEvent.MOUSE_OUT):
 					mouseOver = false;
+					mouseDown = false;
 				break;
 
 				default:
@@ -322,23 +332,18 @@ package com.njs.toolkit.ui.buttons
 		{
 			if (background)
 			{
+				var matrix : Matrix = new Matrix ();
+				matrix.createGradientBox (width, height, Math.PI * 0.5);
+
+				var backgroundColors : Array = mouseDown ? selectedBackgroundColors : backgroundColors;
+				var dropShadowAlpha : Number = mouseOver ? 1.0 : 0.5;
+
 				background.graphics.clear ();
+				background.graphics.beginGradientFill (GradientType.LINEAR, backgroundColors, BACKGROUND_ALPHAS, BACKGROUND_RATIOS, matrix);
+				background.graphics.drawRoundRect (0, 0, width, height, ELLIPSE_SIZE, ELLIPSE_SIZE);
+				background.graphics.endFill ();
 
-				if (mouseDown)
-				{
-					background.graphics.beginFill (selectedBackgroundColor);
-					background.graphics.drawRoundRect (0, 0, width, height, ELLIPSE_SIZE, ELLIPSE_SIZE);
-					background.graphics.endFill ();
-				}
-				else if (mouseOver)
-				{
-					var matrix : Matrix = new Matrix ();
-					matrix.createGradientBox (width, height, Math.PI * 0.5);
-
-					background.graphics.beginGradientFill (GradientType.LINEAR, hoverBackgroundColors, BACKGROUND_ALPHAS, BACKGROUND_RATIOS, matrix);
-					background.graphics.drawRoundRect (0, 0, width, height, ELLIPSE_SIZE, ELLIPSE_SIZE);
-					background.graphics.endFill ();
-				}
+				filters = [new GlowFilter (DROP_SHADOW_COLOR, dropShadowAlpha)];
 			}
 		}
 
