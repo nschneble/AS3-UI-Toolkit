@@ -23,7 +23,7 @@ package com.njs.toolkit.ui.buttons
 		public static const RIGHT_MARGIN : Number = 5;
 		public static const BACKGROUND_ALPHAS : Array = [1.0, 1.0];
 		public static const BACKGROUND_RATIOS : Array = [0, 255];
-		public static const ELLIPSE_SIZE : Number = 8;
+		public static const DEFAULT_CORNER_RADIUS : Number = 8;
 		public static const DEFAULT_SELECTED_BACKGROUND_COLORS : Array = [0xCCCCCC, 0x999999];
 		public static const DEFAULT_BACKGROUND_COLORS : Array = [0xFFFFFF, 0xCCCCCC];
 		public static const DEFAULT_TEXT_COLOR : uint = 0x666666;
@@ -42,6 +42,7 @@ package com.njs.toolkit.ui.buttons
 		private var _selectedTextColor : uint;
 		private var _text : String;
 		private var _showDropShadow : Boolean;
+		private var _cornerRadius : Number;
 		private var mouseOver : Boolean;
 		private var mouseDown : Boolean;
 
@@ -74,6 +75,7 @@ package com.njs.toolkit.ui.buttons
 			_selectedTextColor = DEFAULT_SELECTED_TEXT_COLOR;
 			_text = "";
 			_showDropShadow = true;
+			_cornerRadius = DEFAULT_CORNER_RADIUS;
 
 			mouseOver = false;
 			mouseDown = false;
@@ -256,6 +258,24 @@ package com.njs.toolkit.ui.buttons
 			return _showDropShadow;
 		}
 
+		/**
+		 * The radius of the ellipse used to draw the rounded corners.
+		 */
+		public function set cornerRadius (value : Number) : void
+		{
+			if (! isNaN (value) && value >= 0)
+			{
+				_cornerRadius = value;
+
+				updateDisplayList ();
+			}
+		}
+
+		public function get cornerRadius () : Number
+		{
+			return _cornerRadius;
+		}
+
 
 		// event handlers
 
@@ -359,7 +379,16 @@ package com.njs.toolkit.ui.buttons
 
 				background.graphics.clear ();
 				background.graphics.beginGradientFill (GradientType.LINEAR, backgroundColors, BACKGROUND_ALPHAS, BACKGROUND_RATIOS, matrix);
-				background.graphics.drawRoundRect (0, 0, width, height, ELLIPSE_SIZE, ELLIPSE_SIZE);
+
+				if (cornerRadius > 0)
+				{
+					background.graphics.drawRoundRect (0, 0, width, height, cornerRadius, cornerRadius);
+				}
+				else
+				{
+					background.graphics.drawRect (0, 0, width, height);
+				}
+
 				background.graphics.endFill ();
 
 				if (showDropShadow)
