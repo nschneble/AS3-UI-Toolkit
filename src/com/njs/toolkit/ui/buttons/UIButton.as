@@ -2,7 +2,9 @@ package com.njs.toolkit.ui.buttons
 {
 	import com.njs.toolkit.ui.UIComponent;
 	import com.njs.toolkit.ui.text.UITextField;
+	import com.njs.toolkit.util.ImageUtil;
 	
+	import flash.display.Bitmap;
 	import flash.display.GradientType;
 	import flash.display.Shape;
 	import flash.events.MouseEvent;
@@ -35,6 +37,7 @@ package com.njs.toolkit.ui.buttons
 		public static const DEFAULT_SELECTED_BACKGROUND_ALPHAS : Array = [1.0, 1.0];
 		public static const DEFAULT_HIGHLIGHTED_BACKGROUND_ALPHAS : Array = [1.0, 1.0];
 		public static const DEFAULT_BACKGROUND_ALPHAS : Array = [1.0, 1.0];
+		public static const ICON_MARGIN : Number = 7;
 
 
 		// instance variables
@@ -47,6 +50,7 @@ package com.njs.toolkit.ui.buttons
 		private var _highlightedTextColor : uint;
 		private var _selectedTextColor : uint;
 		private var _text : String;
+		private var _icon : Bitmap;
 		private var _showDropShadow : Boolean;
 		private var _cornerRadius : Number;
 		private var _selectedBackgroundAlphas : Array;
@@ -85,6 +89,7 @@ package com.njs.toolkit.ui.buttons
 			_highlightedTextColor = DEFAULT_HIGHLIGHTED_TEXT_COLOR;
 			_selectedTextColor = DEFAULT_SELECTED_TEXT_COLOR;
 			_text = "";
+			_icon = null;
 			_showDropShadow = true;
 			_cornerRadius = DEFAULT_CORNER_RADIUS;
 			_selectedBackgroundAlphas = DEFAULT_SELECTED_BACKGROUND_ALPHAS;
@@ -147,7 +152,8 @@ package com.njs.toolkit.ui.buttons
 
 		override public function get width () : Number
 		{
-			return (_width > 0 ? _width : (buttonTextField ? LEFT_MARGIN + buttonTextField.width + RIGHT_MARGIN : 0));
+			return (_width > 0 ? _width : (buttonTextField && text ? LEFT_MARGIN + buttonTextField.width + RIGHT_MARGIN :
+				(icon ? icon.width + (ICON_MARGIN * 2) : 0)));
 		}
 
 		/**
@@ -165,7 +171,8 @@ package com.njs.toolkit.ui.buttons
 
 		override public function get height () : Number
 		{
-			return (_height > 0 ? _height : (buttonTextField ? TOP_MARGIN + buttonTextField.height + BOTTOM_MARGIN : 0));
+			return (_height > 0 ? _height : (buttonTextField && text ? TOP_MARGIN + buttonTextField.height + BOTTOM_MARGIN :
+				(icon ? icon.height + (ICON_MARGIN * 2) : 0)));
 		}
 
 
@@ -295,6 +302,30 @@ package com.njs.toolkit.ui.buttons
 		public function get text () : String
 		{
 			return _text;
+		}
+
+		/**
+		 * The button icon.
+		 */
+		public function set icon (value : Bitmap) : void
+		{
+			if (value)
+			{
+				if (icon && contains (icon))
+				{
+					removeChild (icon);
+					_icon = null;
+				}
+
+				_icon = value;
+
+				updateDisplayList ();
+			}
+		}
+
+		public function get icon () : Bitmap
+		{
+			return _icon;
 		}
 
 		/**
@@ -448,8 +479,33 @@ package com.njs.toolkit.ui.buttons
 			 * the size of the text field.
 			 */
 
+			sizeAndPositionIcon ();
 			sizeAndPositionTextField ();
 			sizeAndPositionBackground ();
+		}
+
+		/**
+		 * Sizes and positions the button icon.
+		 */
+		protected function sizeAndPositionIcon () : void
+		{
+			if (icon)
+			{
+				var newIconWidth : Number = icon.width;
+				var newIconHeight : Number = buttonTextField && text ? buttonTextField.height : icon.height;
+
+				ImageUtil.resize (icon, newIconWidth, newIconHeight, true);
+
+				icon.x = ICON_MARGIN;
+				icon.y = ICON_MARGIN;
+
+				if (_height > 0)
+				{
+					icon.y = (_height - icon.height) * 0.5;
+				}
+
+				addChild (icon);
+			}
 		}
 
 		/**
@@ -478,6 +534,18 @@ package com.njs.toolkit.ui.buttons
 				if (_height > 0)
 				{
 					buttonTextField.y = (_height - buttonTextField.height) * 0.5;
+				}
+
+				if (icon)
+				{
+					var xIconOffset : Number = icon.x + icon.width;
+
+					buttonTextField.x += xIconOffset;
+
+					if (_width > 0)
+					{
+						buttonTextField.width -= xIconOffset;
+					}
 				}
 			}
 		}

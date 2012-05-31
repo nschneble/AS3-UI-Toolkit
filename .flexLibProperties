@@ -5,6 +5,7 @@
     <classEntry path="com.njs.toolkit.util.URLUtil"/>
     <classEntry path="com.njs.toolkit.ui.text.UITextField"/>
     <classEntry path="com.njs.toolkit.ui.buttons.UIButton"/>
+    <classEntry path="com.njs.toolkit.util.ImageUtil"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
