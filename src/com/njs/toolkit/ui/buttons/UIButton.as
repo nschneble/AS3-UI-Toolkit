@@ -359,7 +359,7 @@ package com.njs.toolkit.ui.buttons
 
 				if (_height > 0)
 				{
-					buttonTextField.height = _height - TOP_MARGIN - BOTTOM_MARGIN;
+					buttonTextField.y = (_height - buttonTextField.height) * 0.5;
 				}
 			}
 		}
