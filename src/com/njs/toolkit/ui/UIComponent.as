@@ -2,6 +2,7 @@ package com.njs.toolkit.ui
 {
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.FullScreenEvent;
 	import flash.events.MouseEvent;
 
 
@@ -12,6 +13,7 @@ package com.njs.toolkit.ui
 	{
 		// instance variables
 		private var _clickable : Boolean;
+		private var _fullscreen : Boolean;
 
 
 		public function UIComponent (x : Number = 0, y : Number = 0)
@@ -53,6 +55,11 @@ package com.njs.toolkit.ui
 			addEventListener (Event.REMOVED_FROM_STAGE, onRemovedFromStage);
 
 			createChildren ();
+
+			if (fullscreen)
+			{
+				stage.addEventListener (FullScreenEvent.FULL_SCREEN, onDisplayStateChanged);
+			}
 		}
 
 		private function onRemovedFromStage (event : Event) : void
@@ -63,6 +70,7 @@ package com.njs.toolkit.ui
 			destroy ();
 
 			clickable = false;
+			fullscreen = false;
 		}
 
 		/**
@@ -72,6 +80,17 @@ package com.njs.toolkit.ui
 		 * receives a click event and clickable is true.
 		 */
 		protected function onClick (event : MouseEvent) : void
+		{
+			// override in subclasses
+		}
+
+		/**
+		 * Override to handle fullscreen events.
+		 * 
+		 * This function will be called automatically when the display
+		 * state changes between normal and fullscreen.
+		 */
+		protected function onDisplayStateChanged (event : FullScreenEvent) : void
 		{
 			// override in subclasses
 		}
@@ -104,6 +123,32 @@ package com.njs.toolkit.ui
 		public function get clickable () : Boolean
 		{
 			return _clickable;
+		}
+
+		/**
+		 * Set to true to allow this component to receive events when the
+		 * display state changes between normal and fullscreen.
+		 */
+		public function set fullscreen (value : Boolean) : void
+		{
+			if (fullscreen != value)
+			{
+				_fullscreen = value;
+
+				if (fullscreen && stage)
+				{
+					stage.addEventListener (FullScreenEvent.FULL_SCREEN, onDisplayStateChanged);
+				}
+				else if (stage)
+				{
+					stage.removeEventListener (FullScreenEvent.FULL_SCREEN, onDisplayStateChanged);
+				}
+			}
+		}
+
+		public function get fullscreen () : Boolean
+		{
+			return _fullscreen;
 		}
 
 
