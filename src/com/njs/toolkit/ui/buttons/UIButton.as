@@ -56,11 +56,11 @@ package com.njs.toolkit.ui.buttons
 		private var _selectedBackgroundAlphas : Array;
 		private var _highlightedBackgroundAlphas : Array;
 		private var _backgroundAlphas : Array;
-		private var mouseOver : Boolean;
-		private var mouseDown : Boolean;
 
 		protected var background : Shape;
 		protected var buttonTextField : UITextField;
+		protected var mouseOver : Boolean;
+		protected var mouseDown : Boolean;
 
 
 		public function UIButton (x : Number = 0, y : Number = 0, width : Number = 0, height : Number = 0)
