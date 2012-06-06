@@ -35,6 +35,7 @@ package com.njs.toolkit.ui.text
 		private var _textAlign : String;
 		private var _text : String;
 		private var _useHTMLText : Boolean;
+		private var _autoSize : String;
 
 		protected var textFormat : TextFormat;
 		protected var textField : TextField;
@@ -64,6 +65,7 @@ package com.njs.toolkit.ui.text
 			_textAlign = TextFormatAlign.LEFT;
 			_text = "";
 			_useHTMLText = false;
+			_autoSize = null;
 		}
 
 
@@ -336,6 +338,26 @@ package com.njs.toolkit.ui.text
 			return _useHTMLText;
 		}
 
+		/**
+		 * The autoSize property for the text.
+		 * 
+		 * Defaults to null, in which case the property is automatically
+		 * determined based on the text alignment.
+		 * 
+		 * Expected to be a value from the TextFieldAutoSize class.
+		 */
+		public function set autoSize (value : String) : void
+		{
+			_autoSize = value;
+
+			updateDisplayList ();
+		}
+
+		public function get autoSize () : String
+		{
+			return _autoSize;
+		}
+
 
 		// helper methods
 
@@ -384,7 +406,11 @@ package com.njs.toolkit.ui.text
 		{
 			var autoSize : String;
 
-			if (_width > 0)
+			if (this.autoSize)
+			{
+				autoSize = this.autoSize;
+			}
+			else if (_width > 0)
 			{
 				autoSize = TextFieldAutoSize.NONE;
 			}
