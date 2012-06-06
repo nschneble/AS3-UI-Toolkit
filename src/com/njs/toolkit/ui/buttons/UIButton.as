@@ -37,7 +37,7 @@ package com.njs.toolkit.ui.buttons
 		public static const DEFAULT_SELECTED_BACKGROUND_ALPHAS : Array = [1.0, 1.0];
 		public static const DEFAULT_HIGHLIGHTED_BACKGROUND_ALPHAS : Array = [1.0, 1.0];
 		public static const DEFAULT_BACKGROUND_ALPHAS : Array = [1.0, 1.0];
-		public static const ICON_MARGIN : Number = 7;
+		public static const DEFAULT_ICON_MARGIN : Number = 7;
 
 
 		// instance variables
@@ -56,6 +56,10 @@ package com.njs.toolkit.ui.buttons
 		private var _selectedBackgroundAlphas : Array;
 		private var _highlightedBackgroundAlphas : Array;
 		private var _backgroundAlphas : Array;
+		private var _useBoldText : Boolean;
+		private var _textAlign : String;
+		private var _iconMargin : Number;
+		private var _autoSize : String;
 
 		protected var background : Shape;
 		protected var buttonTextField : UITextField;
@@ -95,6 +99,10 @@ package com.njs.toolkit.ui.buttons
 			_selectedBackgroundAlphas = DEFAULT_SELECTED_BACKGROUND_ALPHAS;
 			_highlightedBackgroundAlphas = DEFAULT_HIGHLIGHTED_BACKGROUND_ALPHAS;
 			_backgroundAlphas = DEFAULT_BACKGROUND_ALPHAS;
+			_useBoldText = true;
+			_textAlign = TextFormatAlign.CENTER;
+			_iconMargin = DEFAULT_ICON_MARGIN;
+			_autoSize = null;
 
 			mouseOver = false;
 			mouseDown = false;
@@ -152,8 +160,26 @@ package com.njs.toolkit.ui.buttons
 
 		override public function get width () : Number
 		{
-			return (_width > 0 ? _width : (buttonTextField && text ? LEFT_MARGIN + buttonTextField.width + RIGHT_MARGIN :
-				(icon ? icon.width + (ICON_MARGIN * 2) : 0)));
+			var width : Number = 0;
+
+			if (_width > 0)
+			{
+				width = _width;
+			}
+			else if (buttonTextField && text && icon)
+			{
+				width = iconMargin + icon.width + buttonTextField.width + RIGHT_MARGIN;
+			}
+			else if (buttonTextField && text)
+			{
+				width = LEFT_MARGIN + buttonTextField.width + RIGHT_MARGIN;
+			}
+			else if (icon)
+			{
+				width = icon.width + (iconMargin * 2);
+			}
+
+			return width;
 		}
 
 		/**
@@ -171,8 +197,22 @@ package com.njs.toolkit.ui.buttons
 
 		override public function get height () : Number
 		{
-			return (_height > 0 ? _height : (buttonTextField && text ? TOP_MARGIN + buttonTextField.height + BOTTOM_MARGIN :
-				(icon ? icon.height + (ICON_MARGIN * 2) : 0)));
+			var height : Number = 0;
+
+			if (_height > 0)
+			{
+				height = _height;
+			}
+			else if (buttonTextField && text)
+			{
+				height = TOP_MARGIN + buttonTextField.height + BOTTOM_MARGIN;
+			}
+			else if (icon)
+			{
+				height = icon.height + (iconMargin * 2);
+			}
+
+			return height;
 		}
 
 
@@ -423,6 +463,80 @@ package com.njs.toolkit.ui.buttons
 			return _backgroundAlphas;
 		}
 
+		/**
+		 * Set to true to display bold button text. True by default.
+		 */
+		public function set useBoldText (value : Boolean) : void
+		{
+			_useBoldText = value;
+
+			updateDisplayList ();
+		}
+
+		public function get useBoldText () : Boolean
+		{
+			return _useBoldText;
+		}
+
+		/**
+		 * Controls the button text alignment.
+		 * 
+		 * Expected to be a value from the TextFormatAlign class.
+		 */
+		public function set textAlign (value : String) : void
+		{
+			if (value)
+			{
+				_textAlign = value;
+
+				updateDisplayList ();
+			}
+		}
+
+		public function get textAlign () : String
+		{
+			return _textAlign;
+		}
+
+		/**
+		 * The margin between the button icon and the edge of the
+		 * component.
+		 */
+		public function set iconMargin (value : Number) : void
+		{
+			if (! isNaN (value) && value >= 0)
+			{
+				_iconMargin = value;
+
+				updateDisplayList ();
+			}
+		}
+
+		public function get iconMargin () : Number
+		{
+			return _iconMargin;
+		}
+
+		/**
+		 * The autoSize property for the button text.
+		 * 
+		 * Defaults to null, in which case the property is automatically
+		 * determined based on the text alignment.
+		 * 
+		 * Expected to be a value from the TextFieldAutoSize class.
+		 */
+		public function set autoSize (value : String) : void
+		{
+			_autoSize = value;
+
+			updateDisplayList ();
+		}
+
+		public function get autoSize () : String
+		{
+			return _autoSize;
+		}
+
 
 		// event handlers
 
@@ -492,17 +606,12 @@ package com.njs.toolkit.ui.buttons
 			if (icon)
 			{
 				var newIconWidth : Number = icon.width;
-				var newIconHeight : Number = buttonTextField && text ? buttonTextField.height : icon.height;
+				var newIconHeight : Number = buttonTextField && text ? height - (iconMargin * 2) : icon.height;
 
 				ImageUtil.resize (icon, newIconWidth, newIconHeight, true);
 
-				icon.x = ICON_MARGIN;
-				icon.y = ICON_MARGIN;
-
-				if (_height > 0)
-				{
-					icon.y = (_height - icon.height) * 0.5;
-				}
+				icon.x = iconMargin;
+				icon.y = (height - icon.height) * 0.5;
 
 				addChild (icon);
 			}
@@ -519,33 +628,17 @@ package com.njs.toolkit.ui.buttons
 
 				buttonTextField.text = text;
 				buttonTextField.textColor = textColor;
-				buttonTextField.textAlign = TextFormatAlign.CENTER;
-				buttonTextField.useBoldText = true;
+				buttonTextField.textAlign = textAlign;
+				buttonTextField.autoSize = autoSize;
+				buttonTextField.useBoldText = useBoldText;
 				buttonTextField.shrinkToFit = true;
 
-				buttonTextField.x = LEFT_MARGIN;
-				buttonTextField.y = TOP_MARGIN;
+				buttonTextField.x = icon ? icon.x + icon.width : LEFT_MARGIN;
+				buttonTextField.y = _height > 0 ? (height - buttonTextField.height) * 0.5 : TOP_MARGIN;
 
 				if (_width > 0)
 				{
-					buttonTextField.width = _width - LEFT_MARGIN - RIGHT_MARGIN;
-				}
-
-				if (_height > 0)
-				{
-					buttonTextField.y = (_height - buttonTextField.height) * 0.5;
-				}
-
-				if (icon)
-				{
-					var xIconOffset : Number = icon.x + icon.width;
-
-					buttonTextField.x += xIconOffset;
-
-					if (_width > 0)
-					{
-						buttonTextField.width -= xIconOffset;
-					}
+					buttonTextField.width = width - buttonTextField.x - RIGHT_MARGIN;
 				}
 			}
 		}
@@ -568,7 +661,7 @@ package com.njs.toolkit.ui.buttons
 
 				if (cornerRadius > 0)
 				{
-					background.graphics.drawRoundRect (0, 0, width, height, cornerRadius, cornerRadius);
+					background.graphics.drawRoundRect (0, 0, width, height, cornerRadius);
 				}
 				else
 				{
