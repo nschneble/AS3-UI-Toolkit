@@ -7,6 +7,8 @@
     <classEntry path="com.njs.toolkit.ui.buttons.UIButton"/>
     <classEntry path="com.njs.toolkit.util.ImageUtil"/>
     <classEntry path="com.njs.toolkit.ui.buttons.UIToggleButton"/>
+    <classEntry path="com.njs.toolkit.ui.containers.Panel"/>
+    <classEntry path="com.njs.toolkit.events.PanelEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
