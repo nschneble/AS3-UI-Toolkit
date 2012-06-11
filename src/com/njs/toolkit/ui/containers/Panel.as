@@ -5,8 +5,11 @@ package com.njs.toolkit.ui.containers
 	import com.njs.toolkit.ui.buttons.UIButton;
 	import com.njs.toolkit.ui.text.UITextField;
 	
+	import flash.display.DisplayObject;
+	import flash.display.DisplayObjectContainer;
 	import flash.display.Shape;
 	import flash.events.MouseEvent;
+	import flash.filters.BlurFilter;
 	import flash.filters.GlowFilter;
 
 
@@ -54,14 +57,20 @@ package com.njs.toolkit.ui.containers
 		protected var background : Shape;
 		protected var titleTextField : UITextField;
 		protected var closeButton : UIButton;
+		protected var parentContainer : DisplayObjectContainer;
+		protected var backdrop : Shape;
+		protected var modal : Boolean;
 
 
-		public function Panel (x : Number = 0, y : Number = 0, width : Number = 0, height : Number = 0)
+		public function Panel (parentContainer : DisplayObjectContainer = null, modal : Boolean = false, x : Number = 0, y : Number = 0, width : Number = 0, height : Number = 0)
 		{
 			super (x, y);
 
 			_width = isNaN (width) ? 0 : Math.max (width, 0);
 			_height = isNaN (height) ? 0 : Math.max (height, 0);
+
+			this.parentContainer = parentContainer;
+			this.modal = modal;
 
 			init ();
 		}
@@ -94,6 +103,15 @@ package com.njs.toolkit.ui.containers
 			closeButton = new UIButton (xCloseButton, yCloseButton);
 			closeButton.addEventListener (MouseEvent.CLICK, onCloseButtonClick);
 
+			if (parentContainer == null)
+			{
+				parentContainer = stage;
+			}
+
+			backdrop = new Shape ();
+			parentContainer.addChildAt (backdrop, parentContainer.contains (this) ?
+				parentContainer.getChildIndex (this) : parentContainer.numChildren);
+
 			updateDisplayList ();
 		}
 
@@ -106,9 +124,18 @@ package com.njs.toolkit.ui.containers
 
 			closeButton.removeEventListener (MouseEvent.CLICK, onCloseButtonClick);
 
+			if (parentContainer.contains (backdrop))
+			{
+				parentContainer.removeChild (backdrop);
+			}
+
+			applyBlurFilters (true);
+
 			background = null;
 			titleTextField = null;
 			closeButton = null;
+			parentContainer = null;
+			backdrop = null;
 		}
 
 		/**
@@ -291,6 +318,7 @@ package com.njs.toolkit.ui.containers
 			sizeAndPositionTitle ();
 			sizeAndPositionCloseButton ();
 			sizeAndPositionBackground ();
+			sizeAndPositionModalBackdrop ();
 		}
 
 		/**
@@ -352,6 +380,50 @@ package com.njs.toolkit.ui.containers
 			}
 
 			filters = [new GlowFilter (0xCCCCCC)];
+		}
+
+		/**
+		 * Sizes and positions the backdrop for modal panels.
+		 */
+		protected function sizeAndPositionModalBackdrop () : void
+		{
+			if (parentContainer && backdrop)
+			{
+				var xBackdrop : Number = (stage.stageWidth - parentContainer.width) * 0.5;
+				var yBackdrop : Number = (stage.stageHeight - parentContainer.height) * 0.5;
+				var backdropWidth : Number = parentContainer.width;
+				var backdropHeight : Number = parentContainer.height;
+
+				backdrop.graphics.clear ();
+				backdrop.graphics.beginFill (0x000000, 0.5);
+				backdrop.graphics.drawRect (xBackdrop, yBackdrop, backdropWidth, backdropHeight);
+				backdrop.graphics.endFill ();
+
+				applyBlurFilters ();
+			}
+		}
+
+		private function applyBlurFilters (removeFilters : Boolean = false) : void
+		{
+			if (parentContainer && parentContainer == stage)
+			{
+				var i : int;
+				var child : DisplayObject;
+
+				for (i = 0; i < parentContainer.numChildren; ++ i)
+				{
+					child = parentContainer.getChildAt (i);
+
+					if (child != this)
+					{
+						child.filters = removeFilters ? [] : [new BlurFilter ()];
+					}
+				}
+			}
+			else if (parentContainer)
+			{
+				parentContainer.filters = removeFilters ? [] : [new BlurFilter ()];
+			}
 		}
 
 	}
