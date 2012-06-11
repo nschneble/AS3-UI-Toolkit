@@ -41,9 +41,18 @@ package com.njs.toolkit.ui.containers
 		public static const DEFAULT_PANEL_HEIGHT : Number = 325;
 		public static const DEFAULT_BORDER_THICKNESS : Number = 8;
 		public static const DEFAULT_CORNER_RADIUS : Number = 6;
+		public static const DEFAULT_TITLE_COLOR : uint = 0x666666;
 		public static const DEFAULT_PANEL_TITLE : String = "Panel";
 		public static const CLOSE_BUTTON_TEXT : String = "X";
 		public static const CLOSE_BUTTON_MARGIN : Number = 2;
+		public static const CLOSE_BUTTON_BACKGROUND_ALPHAS : Array = [0, 0];
+		public static const DEFAULT_CLOSE_BUTTON_TEXT_COLOR : uint = 0x666666;
+		public static const DEFAULT_CLOSE_BUTTON_HIGHLIGHTED_TEXT_COLOR : uint = 0x000000;
+		public static const DEFAULT_CLOSE_BUTTON_SELECTED_TEXT_COLOR : uint = 0xFFFFFF;
+		public static const DEFAULT_BORDER_COLOR : uint = 0xCCCCCC;
+		public static const DEFAULT_CONTENT_AREA_BACKGROUND_COLOR : uint = 0xFFFFFF;
+		public static const DEFAULT_BACKDROP_COLOR : uint = 0x000000;
+		public static const BACKDROP_ALPHA : Number = 0.5;
 
 
 		// instance variables
@@ -53,6 +62,13 @@ package com.njs.toolkit.ui.containers
 		private var _cornerRadius : Number;
 		private var _title : String;
 		private var _showCloseButton : Boolean;
+		private var _titleColor : uint;
+		private var _closeButtonTextColor : uint;
+		private var _closeButtonHighlightedTextColor : uint;
+		private var _closeButtonSelectedTextColor : uint;
+		private var _borderColor : uint;
+		private var _contentAreaBackgroundColor : uint;
+		private var _backdropColor : uint;
 
 		protected var background : Shape;
 		protected var titleTextField : UITextField;
@@ -81,6 +97,13 @@ package com.njs.toolkit.ui.containers
 			_cornerRadius = DEFAULT_CORNER_RADIUS;
 			_title = DEFAULT_PANEL_TITLE;
 			_showCloseButton = false;
+			_titleColor = DEFAULT_TITLE_COLOR;
+			_closeButtonTextColor = DEFAULT_CLOSE_BUTTON_TEXT_COLOR;
+			_closeButtonHighlightedTextColor = DEFAULT_CLOSE_BUTTON_HIGHLIGHTED_TEXT_COLOR;
+			_closeButtonSelectedTextColor = DEFAULT_CLOSE_BUTTON_SELECTED_TEXT_COLOR;
+			_borderColor = DEFAULT_BORDER_COLOR;
+			_contentAreaBackgroundColor = DEFAULT_CONTENT_AREA_BACKGROUND_COLOR;
+			_backdropColor = DEFAULT_BACKDROP_COLOR;
 		}
 
 
@@ -252,6 +275,112 @@ package com.njs.toolkit.ui.containers
 		}
 
 		/**
+		 * The color of the panel title.
+		 */
+		public function set titleColor (value : uint) : void
+		{
+			_titleColor = value;
+
+			updateDisplayList ();
+		}
+
+		public function get titleColor () : uint
+		{
+			return _titleColor;
+		}
+
+		/**
+		 * The color of the close button text.
+		 */
+		public function set closeButtonTextColor (value : uint) : void
+		{
+			_closeButtonTextColor = value;
+
+			updateDisplayList ();
+		}
+
+		public function get closeButtonTextColor () : uint
+		{
+			return _closeButtonTextColor;
+		}
+
+		/**
+		 * The color of the close button text when the mouse is over the
+		 * button.
+		 */
+		public function set closeButtonHighlightedTextColor (value : uint) : void
+		{
+			_closeButtonHighlightedTextColor = value;
+
+			updateDisplayList ();
+		}
+
+		public function get closeButtonHighlightedTextColor () : uint
+		{
+			return _closeButtonHighlightedTextColor;
+		}
+
+		/**
+		 * The color of the close button text when the button is selected.
+		 */
+		public function set closeButtonSelectedTextColor (value : uint) : void
+		{
+			_closeButtonSelectedTextColor = value;
+
+			updateDisplayList ();
+		}
+
+		public function get closeButtonSelectedTextColor () : uint
+		{
+			return _closeButtonSelectedTextColor;
+		}
+
+		/**
+		 * The color of the panel border and title bar background.
+		 */
+		public function set borderColor (value : uint) : void
+		{
+			_borderColor = value;
+
+			updateDisplayList ();
+		}
+
+		public function get borderColor () : uint
+		{
+			return _borderColor;
+		}
+
+		/**
+		 * The background color of the content area.
+		 */
+		public function set contentAreaBackgroundColor (value : uint) : void
+		{
+			_contentAreaBackgroundColor = value;
+
+			updateDisplayList ();
+		}
+
+		public function get contentAreaBackgroundColor () : uint
+		{
+			return _contentAreaBackgroundColor;
+		}
+
+		/**
+		 * The color of the backdrop for modal panels.
+		 */
+		public function set backdropColor (value : uint) : void
+		{
+			_backdropColor = value;
+
+			updateDisplayList ();
+		}
+
+		public function get backdropColor () : uint
+		{
+			return _backdropColor;
+		}
+
+		/**
 		 * The height of the title bar. This value will be zero until the
 		 * panel has been added to the stage.
 		 */
@@ -329,7 +458,7 @@ package com.njs.toolkit.ui.containers
 			if (titleTextField)
 			{
 				titleTextField.text = title;
-				titleTextField.textColor = 0x666666;
+				titleTextField.textColor = titleColor;
 				titleTextField.useBoldText = true;
 				titleTextField.shrinkToFit = true;
 			}
@@ -352,10 +481,12 @@ package com.njs.toolkit.ui.containers
 				}
 
 				closeButton.text = CLOSE_BUTTON_TEXT;
-				closeButton.highlightedTextColor = 0x000000;
-				closeButton.backgroundAlphas = [0, 0];
-				closeButton.highlightedBackgroundAlphas = [0, 0];
-				closeButton.selectedBackgroundAlphas = [0, 0];
+				closeButton.textColor = closeButtonTextColor;
+				closeButton.highlightedTextColor = closeButtonHighlightedTextColor;
+				closeButton.selectedTextColor = closeButtonSelectedTextColor;
+				closeButton.backgroundAlphas = CLOSE_BUTTON_BACKGROUND_ALPHAS;
+				closeButton.highlightedBackgroundAlphas = CLOSE_BUTTON_BACKGROUND_ALPHAS;
+				closeButton.selectedBackgroundAlphas = CLOSE_BUTTON_BACKGROUND_ALPHAS;
 				closeButton.showDropShadow = false;
 				closeButton.x = width - closeButton.width - CLOSE_BUTTON_MARGIN;
 			}
@@ -370,16 +501,17 @@ package com.njs.toolkit.ui.containers
 			{
 				background.graphics.clear ();
 
-				background.graphics.beginFill (0xCCCCCC);
+				background.graphics.beginFill (borderColor);
 				background.graphics.drawRoundRect (0, 0, width, height, cornerRadius);
 				background.graphics.endFill ();
 
-				background.graphics.beginFill (0xFFFFFF);
+				background.graphics.beginFill (contentAreaBackgroundColor);
 				background.graphics.drawRoundRect (xContentArea, yContentArea, contentAreaWidth, contentAreaHeight, cornerRadius);
 				background.graphics.endFill ();
 			}
 
-			filters = [new GlowFilter (0xCCCCCC)];
+			// uses the same color as the border to generate a soft glow
+			filters = [new GlowFilter (borderColor)];
 		}
 
 		/**
@@ -395,7 +527,7 @@ package com.njs.toolkit.ui.containers
 				var backdropHeight : Number = parentContainer.height;
 
 				backdrop.graphics.clear ();
-				backdrop.graphics.beginFill (0x000000, 0.5);
+				backdrop.graphics.beginFill (backdropColor, BACKDROP_ALPHA);
 				backdrop.graphics.drawRect (xBackdrop, yBackdrop, backdropWidth, backdropHeight);
 				backdrop.graphics.endFill ();
 
@@ -403,7 +535,16 @@ package com.njs.toolkit.ui.containers
 			}
 		}
 
-		private function applyBlurFilters (removeFilters : Boolean = false) : void
+		/**
+		 * Applies a <code>BlurFilter</code> object to the backdrop for
+		 * modal panels.<br />
+		 * <br />
+		 * <strong>Note:</strong> If the parent container is the stage,
+		 * then a <code>BlurFilter</code> object is applied to
+		 * <em>every</em> child component on the stage, other than the
+		 * panel itself.
+		 */
+		protected function applyBlurFilters (removeFilters : Boolean = false) : void
 		{
 			if (parentContainer && parentContainer == stage)
 			{
