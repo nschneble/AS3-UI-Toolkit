@@ -1,5 +1,6 @@
 package com.njs.toolkit.ui.image
 {
+	import com.njs.tinyurl.TinyURL;
 	import com.njs.toolkit.ui.UIComponent;
 	import com.njs.toolkit.util.URLUtil;
 	
@@ -8,7 +9,9 @@ package com.njs.toolkit.ui.image
 	import flash.display.Loader;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
+	import flash.events.SecurityErrorEvent;
 	import flash.net.URLRequest;
+	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
 
 
@@ -23,6 +26,7 @@ package com.njs.toolkit.ui.image
 		// constants
 		public static const INVALID_URL_MESSAGE : String = "{SmoothImage}: {The following URL is not valid: \"{MESSAGE_DATA}\"}";
 		public static const IMAGE_NOT_LOADED_MESSAGE : String = "{SmoothImage}: {The image failed to load: \"{MESSAGE_DATA}\"}";
+		public static const IMAGE_BYTES_NOT_LOADED_MESSAGE : String = "{SmoothImage}: {Could not access bytes for image: \"{MESSAGE_DATA}\"}";
 		public static const MESSAGE_DATA_ALIAS : String = "{MESSAGE_DATA}";
 
 
@@ -32,6 +36,7 @@ package com.njs.toolkit.ui.image
 		private var _maintainAspectRatio : Boolean;
 		private var _centered : Boolean;
 		private var loader : Loader;
+		private var imageURL : String;
 
 		/**
 		 * The underlying bitmap image.
@@ -72,6 +77,7 @@ package com.njs.toolkit.ui.image
 				loader.contentLoaderInfo.removeEventListener (Event.COMPLETE, onImageLoaded);
 				loader.contentLoaderInfo.removeEventListener (Event.COMPLETE, onImageBytesLoaded);
 				loader.contentLoaderInfo.removeEventListener (IOErrorEvent.IO_ERROR, onImageNotLoaded);
+				loader.contentLoaderInfo.removeEventListener (SecurityErrorEvent.SECURITY_ERROR, onImageBytesNotLoaded);
 
 				loader.unload ();
 				loader = null;
@@ -91,11 +97,15 @@ package com.njs.toolkit.ui.image
 				loader.contentLoaderInfo.addEventListener (Event.COMPLETE, onImageLoaded);
 				loader.contentLoaderInfo.addEventListener (IOErrorEvent.IO_ERROR, onImageNotLoaded);
 
-				loader.load (new URLRequest (imageURL));
+				loader.load (new URLRequest (imageURL), new LoaderContext (true));
+
+				this.imageURL = imageURL;
 			}
 			else
 			{
 				trace (INVALID_URL_MESSAGE.replace (MESSAGE_DATA_ALIAS, imageURL));
+
+				this.imageURL = null;
 			}
 		}
 
@@ -183,16 +193,22 @@ package com.njs.toolkit.ui.image
 			 * copy of the image as a byte array.
 			 */
 
+			loader.contentLoaderInfo.addEventListener (SecurityErrorEvent.SECURITY_ERROR, onImageBytesNotLoaded);
 			var bytes : ByteArray = loader.contentLoaderInfo.bytes;
-			loader.unload ();
 
-			loader.contentLoaderInfo.addEventListener (Event.COMPLETE, onImageBytesLoaded);
-			loader.loadBytes (bytes);
+			if (loader)
+			{
+				loader.unload ();
+
+				loader.contentLoaderInfo.addEventListener (Event.COMPLETE, onImageBytesLoaded);
+				loader.loadBytes (bytes);
+			}
 		}
 
 		private function onImageBytesLoaded (event : Event) : void
 		{
 			loader.contentLoaderInfo.removeEventListener (Event.COMPLETE, onImageBytesLoaded);
+			loader.contentLoaderInfo.removeEventListener (SecurityErrorEvent.SECURITY_ERROR, onImageBytesNotLoaded);
 
 			var bitmapData : BitmapData = new BitmapData (loader.contentLoaderInfo.width, loader.contentLoaderInfo.height);
 			bitmapData.draw (loader);
@@ -227,6 +243,31 @@ package com.njs.toolkit.ui.image
 
 			loader.unload ();
 			loader = null;
+		}
+
+		private function onImageBytesNotLoaded (event : SecurityErrorEvent) : void
+		{
+			loader.contentLoaderInfo.removeEventListener (SecurityErrorEvent.SECURITY_ERROR, onImageBytesNotLoaded);
+
+			trace (IMAGE_BYTES_NOT_LOADED_MESSAGE.replace (MESSAGE_DATA_ALIAS, event.text));
+
+			loader.unload ();
+			loader = null;
+
+			/*
+			 * TinyURL.com has a wildcard cross-domain policy, so creating
+			 * a shortened URL to a photo should allow us to load it.
+			 */
+
+			if (! imageURL.match ("http://tinyurl.com/"))
+			{
+				TinyURL.create (imageURL, onTinyURLCreated);
+			}
+		}
+
+		private function onTinyURLCreated (tinyURL : String) : void
+		{
+			load (tinyURL);
 		}
 
 
